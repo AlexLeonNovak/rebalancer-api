@@ -4,7 +4,6 @@ class UsersController {
 	async register (req, res, next) {
 		try {
 			const userData = await userService.registration(req.body);
-			console.log(userData)
 
 			const cookieConfig = {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true};
 			res.cookie('refreshToken', userData.refreshToken, cookieConfig);
@@ -12,15 +11,22 @@ class UsersController {
 
 			return res.json(userData);
 		} catch (e) {
-			console.log(e);
+			next(e);
 		}
 	}
 
 	async login (req, res, next) {
 		try {
+			const {email, password} = req.body;
+			const userData = await userService.login(email, password);
 
+			const cookieConfig = {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true};
+			res.cookie('refreshToken', userData.refreshToken, cookieConfig);
+			res.cookie('deviceId', userData.deviceId, cookieConfig);
+
+			return res.json(userData);
 		} catch (e) {
-
+			next(e);
 		}
 	}
 
@@ -28,7 +34,7 @@ class UsersController {
 		try {
 
 		} catch (e) {
-
+			next(e);
 		}
 	}
 
@@ -36,7 +42,19 @@ class UsersController {
 		try {
 
 		} catch (e) {
+			next(e);
+		}
+	}
 
+	async activate (req, res, next) {
+		try {
+			const {token} = req.params;
+			console.log(token)
+			const userData = await userService.activate(token);
+			return res.json(userData);
+			// return res.redirect(process.env.CLIENT_URL);
+		} catch (e) {
+			next(e);
 		}
 	}
 
@@ -45,7 +63,7 @@ class UsersController {
 		try {
 			res.json(['qwe', 'xcd']);
 		} catch (e) {
-
+			next(e);
 		}
 	}
 }

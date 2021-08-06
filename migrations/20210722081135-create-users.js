@@ -26,9 +26,13 @@ module.exports = {
       status: {
         type: Sequelize.STRING
       },
-      activationLink: {
+      emailConfirmToken: {
         type: Sequelize.STRING,
-        field: 'activation_link'
+        field: 'email_confirm_token'
+      },
+      passwordResetToken: {
+        type: Sequelize.STRING,
+        field: 'password_reset_token'
       },
       createdAt: {
         allowNull: false,

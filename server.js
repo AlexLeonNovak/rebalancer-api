@@ -7,12 +7,16 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3030;
 const routes = require('./settings/routes');
+const errorMiddleware = require('./middlewares/error.middleware');
+const responseMiddleware = require('./middlewares/response.middleware');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors());
-app.use('/api', routes)
+app.use(responseMiddleware);
+app.use('/api', routes);
+app.use(errorMiddleware);
 
 app.listen(port, () => {
 	console.log(`App starts on port ${port}`);

@@ -10,6 +10,7 @@ const tokenService = require('./token.service');
 const ApiErrorException = require('../exceptions/api-error.exception');
 
 class UsersService {
+
 	async registration({email, password, firstName, lastName}) {
 		this._validate({email, password});
 		const candidate = await Users.findOne({
@@ -32,10 +33,10 @@ class UsersService {
 		})
 		// await mailService.sendActivationMail(email, `${process.env.API_URL}/api/user/activate/${emailConfirmToken}`);
 
-		return this._userData(user);
+		return this._userData(user, {emailConfirmToken});
 	}
 
-	async login(email, password) {
+	async login(email, password, deviceId) {
 		const user = await Users.findOne({where: {email}});
 		if (!user) {
 			throw ApiErrorException.BadRequest('Wrong login or password');
@@ -44,7 +45,7 @@ class UsersService {
 		if (!isPasswordCorrect) {
 			throw ApiErrorException.BadRequest('Wrong login or password');
 		}
-		return this._userData(user);
+		return this._userData(user, {deviceId});
 
 	}
 
@@ -63,6 +64,27 @@ class UsersService {
 		return {...new UserDto(user)}
 	}
 
+	async logout(refreshToken, deviceId) {
+		await tokenService.removeToken(refreshToken, deviceId);
+	}
+
+	async refresh(refreshToken, deviceId) {
+		if (!refreshToken) {
+			throw ApiErrorException.UnauthorizedError();
+		}
+		const userData = tokenService.validateRefreshToken(refreshToken);
+		const tokenFromDb = await tokenService.findToken(refreshToken, deviceId);
+		if (!userData || !tokenFromDb) {
+			throw ApiErrorException.UnauthorizedError();
+		}
+		const user = await Users.findOne({where: {id: userData.id}});
+		return this._userData(user, {deviceId});
+	}
+
+	async getAllUsers() {
+		return await Users.findAll();
+	}
+
 	_validate(obj) {
 		const schema = joi.object({
 			email: joi.string().email(),
@@ -76,21 +98,23 @@ class UsersService {
 		return value;
 	}
 
-	async _userData(user) {
+	async _userData(user, additional = {}) {
 		const userDto = new UserDto(user);
 		const {accessToken, refreshToken} = tokenService.generateTokens({...userDto});
-		const deviceId = uuid.v4();
+		if (!additional.deviceId) {
+			additional.deviceId = uuid.v4();
+		}
 		await tokenService.saveToken({
 			userId: userDto.id,
-			deviceId,
+			deviceId : additional.deviceId,
 			refreshToken
 		});
 
 		return {
 			accessToken,
 			refreshToken,
-			deviceId,
-			user: userDto
+			user: userDto,
+			...additional
 		};
 	}
 }

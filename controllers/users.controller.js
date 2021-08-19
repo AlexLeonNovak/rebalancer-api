@@ -1,13 +1,20 @@
 const userService = require('../services/users.service');
 
 class UsersController {
-	async register (req, res, next) {
+
+	#cookieConfig = {
+		maxAge: 30 * 24 * 60 * 60 * 1000,
+		httpOnly: true,
+		signed: true
+	};
+
+	register = async (req, res, next) => {
 		try {
 			const userData = await userService.registration(req.body);
 
-			const cookieConfig = {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true};
-			res.cookie('refreshToken', userData.refreshToken, cookieConfig);
-			res.cookie('deviceId', userData.deviceId, cookieConfig);
+
+			res.cookie('refreshToken', userData.refreshToken, this.#cookieConfig);
+			res.cookie('deviceId', userData.deviceId, this.#cookieConfig);
 
 			return res.json(userData);
 		} catch (e) {
@@ -15,14 +22,14 @@ class UsersController {
 		}
 	}
 
-	async login (req, res, next) {
+	login = async (req, res, next) => {
 		try {
 			const {email, password} = req.body;
-			const userData = await userService.login(email, password);
+			const {deviceId} = req.cookies;
+			const userData = await userService.login(email, password, deviceId);
 
-			const cookieConfig = {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true};
-			res.cookie('refreshToken', userData.refreshToken, cookieConfig);
-			res.cookie('deviceId', userData.deviceId, cookieConfig);
+			res.cookie('refreshToken', userData.refreshToken, this.#cookieConfig);
+			res.cookie('deviceId', userData.deviceId, this.#cookieConfig);
 
 			return res.json(userData);
 		} catch (e) {
@@ -30,23 +37,34 @@ class UsersController {
 		}
 	}
 
-	async logout (req, res, next) {
+	logout = async (req, res, next) => {
 		try {
+			const {refreshToken, deviceId} = req.signedCookies;
+			await userService.logout(refreshToken, deviceId);
+			res.clearCookie('refreshToken');
+			res.clearCookie('deviceId');
 
+			return res.status(200).json();
 		} catch (e) {
 			next(e);
 		}
 	}
 
-	async refresh (req, res, next) {
+	refresh = async (req, res, next) => {
 		try {
+			const {refreshToken, deviceId} = req.signedCookies;
+			const userData = await userService.refresh(refreshToken, deviceId);
 
+			res.cookie('refreshToken', userData.refreshToken, this.#cookieConfig);
+			res.cookie('deviceId', userData.deviceId, this.#cookieConfig);
+
+			return res.json(userData);
 		} catch (e) {
 			next(e);
 		}
 	}
 
-	async activate (req, res, next) {
+	activate = async (req, res, next) => {
 		try {
 			const {token} = req.params;
 			console.log(token)
@@ -58,10 +76,10 @@ class UsersController {
 		}
 	}
 
-	async getUsers (req, res, next) {
-		//console.log(req);
+	getUsers = async (req, res, next) => {
 		try {
-			res.json(['qwe', 'xcd']);
+			const users = await userService.getAllUsers();
+			return res.json(users);
 		} catch (e) {
 			next(e);
 		}

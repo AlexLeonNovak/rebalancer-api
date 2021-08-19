@@ -1,15 +1,21 @@
-module.exports = (error, req, res, next) => {
-	if (error) {
-		next(error);
-	}
-	const json = res.json;
+module.exports = (req, res, next) => {
+	// if (error) {
+	// 	next(error);
+	// }
+	// const _end = res.end;
+	const _json = res.json;
 	res.json = data => {
-		const body = {
-			isSuccess: true,
-			body: data
+		console.log('res before', data);
+		if (data?.isSuccess === undefined) {
+			data = {
+				isSuccess: true,
+				body: data
+			}
 		}
-		console.log(body)
-		json.apply(res, body);
+		// return next(body);
+		console.log('res ', data);
+		_json.call(res, data);
+		// next();
 	}
-	next();
+	next && next();
 }

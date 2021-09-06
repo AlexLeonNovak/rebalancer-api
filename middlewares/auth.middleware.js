@@ -3,21 +3,16 @@ const tokenService = require('../services/token.service');
 
 module.exports = function (req, res, next) {
 	try {
-		console.log(req.cookies);
-		console.log(req.signedCookies);
-		const {authorization} = req.headers;
-		if (!authorization) {
-			return next(ApiErrorException.UnauthorizedError());
+		const [type, token] = req.headers.authorization?.split(' ');
+		if (type !== 'Bearer' || !token) {
+			throw new Error();
 		}
 
-		const [, token] = authorization.split(' ')
-		if (!token) {
-			return next(ApiErrorException.UnauthorizedError());
-		}
-
+		const {refreshToken} = req.signedCookies;
 		const userData = tokenService.validateAccessToken(token);
-		if (!userData) {
-			return next(ApiErrorException.UnauthorizedError());
+
+		if (!userData || !tokenService.validateRefreshToken(refreshToken)) {
+			throw new Error();
 		}
 
 		req.user = userData;

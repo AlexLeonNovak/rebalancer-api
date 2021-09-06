@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const {UsersTokens} = require('../models');
+const {UsersToken} = require('../models');
 
 const {JWT_ACCESS_SECRET, JWT_REFRESH_SECRET} = process.env;
 
@@ -15,26 +15,26 @@ class TokenService {
 	}
 
 	async saveToken({userId, deviceId, refreshToken}) {
-		const tokenData = await UsersTokens.findOne({
+		const tokenData = await UsersToken.findOne({
 			where: {userId, deviceId}
 		});
 		if (tokenData) {
 			tokenData.refreshToken = refreshToken;
 			return await tokenData.save();
 		}
-		return await UsersTokens.create({userId, deviceId, refreshToken});
+		return await UsersToken.create({userId, deviceId, refreshToken});
 	}
 
 	async removeToken(refreshToken, deviceId) {
 		try {
-			await UsersTokens.destroy({where: {refreshToken, deviceId}});
+			await UsersToken.destroy({where: {refreshToken, deviceId}});
 		} catch (e) {
 			// Do nothing
 		}
 	}
 
 	async findToken(refreshToken, deviceId) {
-		return await UsersTokens.findOne({where: {refreshToken, deviceId}});
+		return await UsersToken.findOne({where: {refreshToken, deviceId}});
 	}
 
 	validateAccessToken(token) {

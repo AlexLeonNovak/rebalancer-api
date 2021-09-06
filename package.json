@@ -4,7 +4,8 @@
   "description": "REST API",
   "main": "server.js",
   "scripts": {
-    "serve": "nodemon server.js",
+    "start": "node server.js",
+    "start:dev": "nodemon --trace-warnings server.js",
     "migrate:up": "sequelize db:migrate",
     "migrate:down": "sequelize db:migrate:undo",
     "migrate:create": "sequelize migration:create"
@@ -13,14 +14,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "helmet": "^4.6.0",
     "joi": "^17.4.1",
     "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
     "mysql2": "^2.2.5",
     "nodemailer": "^6.6.3",
     "randomstring": "^1.2.1",

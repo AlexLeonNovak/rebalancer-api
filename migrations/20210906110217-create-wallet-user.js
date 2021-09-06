@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('users_tokens', {
+    await queryInterface.createTable('wallets__users', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -17,23 +17,26 @@ module.exports = {
           key: 'id'
         }
       },
-      deviceId: {
-        type: Sequelize.STRING,
-      },
-      refreshToken: {
-        type: Sequelize.STRING,
+      walletId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: {
+            tableName: 'wallets',
+          },
+          key: 'id'
+        }
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.DATE
       }
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('users_tokens');
+    await queryInterface.dropTable('wallets__users');
   }
 };

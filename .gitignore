@@ -104,23 +104,6 @@ dist
 # DynamoDB Local files
 .dynamodb/
 
-# TernJS port file
-.tern-port
-© 2021 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Docs
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
-Loading complete Octotree
- Login with GitHub
-{"mode":"full","isActive":false}
 
 # OS X
 .DS_Store*

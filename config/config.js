@@ -1,9 +1,8 @@
-{
+require('dotenv').config();
+
+module.exports = {
   "development": {
-    "username": "root",
-    "password": "root",
-    "database": "rebalancer",
-    "host": "127.0.0.1",
+    "use_env_variable": "DB_URL",
     "dialect": "mysql"
   },
   "test": {
